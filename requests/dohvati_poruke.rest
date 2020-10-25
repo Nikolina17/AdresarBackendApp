@@ -1,0 +1,8 @@
+	
+POST http://localhost:3001/api/adresar
+content-type: application/json
+ 
+{
+  "sadrzaj": "sample",
+  "ime": "Ante"
+}
