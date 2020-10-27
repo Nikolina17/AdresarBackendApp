@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 
 const password = process.env.ATLAS_PASS
-console.log(password);
 const dbname = 'adresar-api'
 const url = `mongodb+srv://Nikolina:${password}@cluster0.k3qu1.mongodb.net/${dbname}?retryWrites=true&w=majority`
 //const url = 'mongodb+srv://Nikolina:${<password>}@cluster0.k3qu1.mongodb.net/${dbname}?retryWrites=true&w=majority'
@@ -37,15 +36,5 @@ porukaSchema.set('toJSON', {
         return ret
     }
 })
-const Poruka = mongoose.model('Poruka', porukaSchema, 'poruke')
-
-Poruka.find({})
-    .then(result => {
-        result.forEach(poruka => {
-            console.log(poruka)
-        })
-        mongoose.connection.close()
-    })
-
 
 module.exports = mongoose.model('Poruka', porukaSchema, 'poruke')
