@@ -29,12 +29,14 @@ app.get('/api/adresar', (req, res) => {
 app.get('/api/adresar/:id', (req, res) => {
     const id = Number(req.params.id)
     const kontakt = adresar.find(p => p.id === id)
-
-    if(kontakt){
+    res.json(kontakt)
+/*
+   if(kontakt){
         res.json(kontakt)
     } else{
         res.status(404).end()
     }
+    */
 })
 
 
