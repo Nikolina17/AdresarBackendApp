@@ -1,9 +1,11 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const Poruka = require('./models/poruka')
 app.use(cors())
 app.use(express.json())
 app.use(express.static('build'))
+
 
 let adresar = [
     {
@@ -23,52 +25,69 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/adresar', (req, res) => {
-    res.json(adresar)
+    Poruka.find({}).then(rez => {
+        res.json(rez)
+    })
 })
 
-app.get('/api/adresar/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const kontakt = adresar.find(p => p.id === id)
-    res.json(kontakt)
-/*
-   if(kontakt){
-        res.json(kontakt)
-    } else{
-        res.status(404).end()
+app.get('/api/adresar/:id', (req, res, next) => {
+    Poruka.findById(req.params.id)
+    .then(poruka => {
+        if(poruka){
+            res.json(poruka)
+        }else{
+            res.status(404).end()
+        }
+    })
+    .catch(error => {next(error)})
+})
+
+const errorHandler = (err, req, res, next) => {
+    console.log(err.message);
+
+    if (err.name === 'CastError') {
+        return res.status(400).send({ error: 'krivi format ID-a' })
+    } else if (err.name === 'ValidationError') {
+        return res.status(400).send({ error: err.message })
     }
-    */
-})
+    next(err)
+}
 
+function zadnjiErrorHandler(err, req, res, next) {
+    res.status(500)
+    res.send('error', { error: err })
+}
 
 app.delete('/api/adresar/:id', (req, res) => {
-    const id = Number(req.params.id)
-    adresar = adresar.filter(p => p.id !== id)
-    res.status(204).end()
+    Poruka.findByIdAndRemove(req.params.id)
+        .then(result => {
+            res.status(204).end()
+        })
+        .catch(err => next(err))
 })
 
-
+/*
 const generirajId = () => {
     const maxId = adresar.length > 0
         ? Math.max(...adresar.map(p => p.id))
         : 0
     return maxId + 1
 }
+*/
 
-app.post('/api/adresar', (req, res) => {
+app.post('/api/adresar', (req, res, next) => {
     const podatak = req.body
-    if(!podatak.ime || !podatak.mail){
-        return res.status(400).json({
-            error: 'Nedostaje sadrzaj'
-        })
-    }
 
-    const kontakt = {
-        id: generirajId(),
+    const poruka = new Poruka({
         ime: podatak.ime,
         mail: podatak.mail
-    }
-    adresar = adresar.concat(kontakt)
-    res.json(kontakt)
+    })
+
+    poruka.save()
+        .then(spremljenaPoruka => {
+            res.json(spremljenaPoruka)
+        })
+        .catch(err => next(err))
 })
 
 
